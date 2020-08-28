@@ -4,6 +4,7 @@ import DeliveryBalconyConsumer from './DeliveryBalconyConsumer';
 import { v4 as uuidv4 } from 'uuid';
 import redis, { RedisClient } from 'redis';
 import { promisify } from 'util';
+import MotoboyProducer from './MotoboyProducer';
 
 const PORT = process.env.PORT || 4000;
 
@@ -17,9 +18,9 @@ export type AsyncRedisClient = RedisClient & {
 };
 
 const redisClient: AsyncRedisClient = redis.createClient({
-  auth_pass: 'redis',
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT) || 6379,
+  auth_pass: process.env.REDIS_PASSWORD || undefined,
 });
 redisClient.getAsync = promisify(redisClient.get).bind(redisClient);
 redisClient.setAsync = promisify(redisClient.set).bind(redisClient);
@@ -28,7 +29,10 @@ redisClient.getsetAsync = promisify(redisClient.getset).bind(redisClient);
 const orderProducer = new OrderProducer();
 orderProducer.start();
 
-const deliveryBalconyConsumer = new DeliveryBalconyConsumer(redisClient);
+const motoboyProducer = new MotoboyProducer();
+motoboyProducer.start();
+
+const deliveryBalconyConsumer = new DeliveryBalconyConsumer(redisClient, motoboyProducer);
 deliveryBalconyConsumer.start();
 
 app.post('/order', async (req, res) => {

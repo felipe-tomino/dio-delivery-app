@@ -1,12 +1,16 @@
 import { KafkaConsumer } from 'node-rdkafka';
 import { OrderStatus, Order } from './OrderProducer';
 import { AsyncRedisClient } from './index';
+import MotoboyProducer from './MotoboyProducer';
 
 const TOPIC_NAME = 'deliveryBalcony';
 const groupId = 'Waiter';
 
 export default class DeliveryBalconyConsumer extends KafkaConsumer {
-  constructor(private readonly redisClient: AsyncRedisClient) {
+  constructor(
+    private readonly redisClient: AsyncRedisClient,
+    private readonly motoboyProducer: MotoboyProducer,
+  ) {
     super(process.env.KAFKA_PASSWORD 
       ? {
         'group.id': groupId,
@@ -53,7 +57,7 @@ export default class DeliveryBalconyConsumer extends KafkaConsumer {
     if (orderStatus === OrderStatus.DRINKS_READY || !order.drinks?.length) {
       console.log(`Order '${id}' food ready...`);
       await this.setOrderStatus(id, OrderStatus.DONE);
-      this.sendToMotoboy(id);
+      this.sendToMotoboy(order);
     } else {
       console.log(`Order '${order.id}' food ready, waiting drinks...`);
     }
@@ -68,7 +72,7 @@ export default class DeliveryBalconyConsumer extends KafkaConsumer {
     if (orderStatus === OrderStatus.FOOD_READY || !order.food?.length) {
       console.log(`Order '${id}' drinks ready...`);
       await this.setOrderStatus(id, OrderStatus.DONE);
-      this.sendToMotoboy(id);
+      this.sendToMotoboy(order);
     } else {
       console.log(`Order '${order.id}' drinks ready, waiting food...`);
     }
@@ -78,8 +82,8 @@ export default class DeliveryBalconyConsumer extends KafkaConsumer {
     await this.redisClient.setAsync(`${orderId}-status`, status);
   }
 
-  async sendToMotoboy(orderId: string) {
-    console.log(`Sending order '${orderId}' to motoboy...`);
+  async sendToMotoboy(order: Order) {
+    await this.motoboyProducer.sendOrderToMotoboy(order);
   }
 
   start() {

@@ -1,12 +1,5 @@
 import { Producer, ProducerGlobalConfig } from 'node-rdkafka';
 
-export enum OrderStatus {
-  WAITING = 'WAITING',
-  FOOD_READY = 'FOOD_READY',
-  DRINKS_READY = 'DRINKS_READY',
-  DONE = 'DONE',
-}
-
 export type Order = {
   id: string,
   address: number,
@@ -14,7 +7,7 @@ export type Order = {
   drinks: string[],
 }
 
-export default class OrderProducer extends Producer {
+export default class MotoboyProducer extends Producer {
   constructor() {
     const config: ProducerGlobalConfig = process.env.KAFKA_PASSWORD
       ? {
@@ -45,15 +38,9 @@ export default class OrderProducer extends Producer {
     super.disconnect();
   }
 
-  async sendOrder(order: Order) {
-    const { food, drinks, ...rest } = order;
-    if (food.length) {
-      await super.produce(`${process.env.KAFKA_TOPIC_PREFIX || ''}food`, null, Buffer.from(JSON.stringify({ food, ...rest })));
-      console.log('Food order sent to the kitchen!');
-    }
-    if (drinks.length) {
-      await super.produce(`${process.env.KAFKA_TOPIC_PREFIX || ''}drinks`, null, Buffer.from(JSON.stringify({ drinks, ...rest })));
-      console.log('Drinks order sent to the bar!');
-    }
+  async sendOrderToMotoboy(order: Order) {
+    console.log(`Sending order '${order.id}' to motoboy...`);
+    await super.produce(`${process.env.KAFKA_TOPIC_PREFIX || ''}delivery`, null, Buffer.from(JSON.stringify(order)));
+    console.log(`Order '${order.id}' sent to motoboy!`);
   }
 }
