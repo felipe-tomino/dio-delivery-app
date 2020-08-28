@@ -26,7 +26,7 @@ export default class MotoboyProducer extends Producer {
       };
     super(config, {});
     super
-      .on('ready', () => console.log('Started OrderProducer'))
+      .on('ready', () => console.log('Started MotoboyProducer'))
       .on('event.error', (error) => { throw error });
   }
 

@@ -53,5 +53,6 @@ app.listen(PORT, () => {
 
 process.on('exit', () => {
   orderProducer.close();
+  motoboyProducer.close();
   deliveryBalconyConsumer.close();
 });
