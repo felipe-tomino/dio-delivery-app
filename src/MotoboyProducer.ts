@@ -40,6 +40,6 @@ export default class MotoboyProducer extends Producer {
 
   async sendOrderToMotoboy(order: Order) {
     await super.produce(`${process.env.KAFKA_TOPIC_PREFIX || ''}delivery`, null, Buffer.from(JSON.stringify(order)));
-    console.log('\x1b[32m%s\x1b[0m', `Order '${order.id.split('-')[0]}' sent to motoboy!`);
+    console.log('\x1b[32m%s\x1b[0m', `Order '${order.id}' sent to motoboy!`);
   }
 }

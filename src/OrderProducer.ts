@@ -46,14 +46,7 @@ export default class OrderProducer extends Producer {
   }
 
   async sendOrder(order: Order) {
-    const { food, drinks, ...rest } = order;
-    if (food?.length) {
-      await super.produce(`${process.env.KAFKA_TOPIC_PREFIX || ''}food`, null, Buffer.from(JSON.stringify({ food, ...rest })));
-      console.log('Food order sent to the kitchen!');
-    }
-    if (drinks?.length) {
-      await super.produce(`${process.env.KAFKA_TOPIC_PREFIX || ''}drinks`, null, Buffer.from(JSON.stringify({ drinks, ...rest })));
-      console.log('Drinks order sent to the bar!');
-    }
+    await super.produce(`${process.env.KAFKA_TOPIC_PREFIX || ''}order`, null, Buffer.from(JSON.stringify(order)));
+    console.log('Order sent to the kitchen!');
   }
 }
