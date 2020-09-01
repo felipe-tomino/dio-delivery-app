@@ -55,11 +55,11 @@ export default class DeliveryBalconyConsumer extends KafkaConsumer {
     ]);
     const order = JSON.parse(stringifiedOrder);
     if (orderStatus === OrderStatus.DRINKS_READY || !order.drinks?.length) {
-      console.log(`Order '${id}' food ready...`);
+      console.log('\x1b[33m%s\x1b[0m', `Order '${id.split('-')[0]}' food ready...`);
       await this.setOrderStatus(id, OrderStatus.DONE);
       this.sendToMotoboy(order);
     } else {
-      console.log(`Order '${order.id}' food ready, waiting drinks...`);
+      console.log('\x1b[31m%s\x1b[0m', `Order '${id.split('-')[0]}' food ready, waiting drinks...`);
     }
   }
 
@@ -70,11 +70,11 @@ export default class DeliveryBalconyConsumer extends KafkaConsumer {
     ]);
     const order = JSON.parse(stringifiedOrder);
     if (orderStatus === OrderStatus.FOOD_READY || !order.food?.length) {
-      console.log(`Order '${id}' drinks ready...`);
+      console.log('\x1b[33m%s\x1b[0m', `Order '${id.split('-')[0]}' drinks ready...`);
       await this.setOrderStatus(id, OrderStatus.DONE);
       this.sendToMotoboy(order);
     } else {
-      console.log(`Order '${order.id}' drinks ready, waiting food...`);
+      console.log('\x1b[31m%s\x1b[0m', `Order '${order.id.split('-')[0]}' drinks ready, waiting food...`);
     }
   }
 
