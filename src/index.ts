@@ -38,11 +38,17 @@ deliveryBalconyConsumer.start();
 app.post('/order', async (req, res) => {
   try {
     const order = { ...req.body, id: uuidv4() };
-    await redisClient.setAsync(`${order.id}-status`, OrderStatus.WAITING);
-    await redisClient.setAsync(order.id, JSON.stringify(order));
-    await orderProducer.sendOrder(order);
-    res.send('Order sent!');
+    if (!order.drinks?.length && !order.food?.length) {
+      res.status(400).send('You must send Drinks array or Food array!');
+    } else {
+      await redisClient.setAsync(`${order.id}-status`, OrderStatus.WAITING);
+      await redisClient.setAsync(order.id, JSON.stringify(order));
+      await orderProducer.sendOrder(order);
+      res.send('Order sent!');
+    }
   } catch (error) {
+    console.error(error);
+    
     res.send(error);
   }
 });
